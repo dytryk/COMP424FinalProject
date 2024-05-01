@@ -21,13 +21,55 @@ def general() = {
     billion(i) = rand.nextInt(101)
   }
   
-  merge(ten)
-  merge(thousand)
-  merge(million)
-  merge(billion)
+  mergeSort(ten)
+  mergeSort(thousand)
+  mergeSort(million)
+  mergeSort(billion)
+  
+  quickSort(ten)
+  quickSort(thousand)
+  quickSort(million)
+  quickSort(billion)
+  
+  radixSort(ten)
+  radixSort(thousand)
+  radixSort(million)
+  radixSort(billion)
+
+  heapSort(ten)
+  heapSort(thousand)
+  heapSort(million)
+  heapSort(billion)
+}
+
+def mergeSort(A: Array[Int]): List[Int] = {
 
 }
 
 def merge(A: Array[Int]): List[Int] = {
+
+}
+
+def quickSort(A: Array[Int]): List[Int] = {
+
+}
+
+def partition(A: Array[Int]): List[Int] = {
+
+}
+
+def radixSort(A: Array[Int]): List[Int] = {
+
+}
+
+def countingSort(A: Array[Int]): List[Int] = {
+
+}
+
+def heapSort(A: Array[Int]): List[Int] = {
+
+}
+
+def maxHeapify(A: Array[Int]): List[Int] = {
 
 }
