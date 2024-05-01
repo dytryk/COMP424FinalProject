@@ -42,34 +42,34 @@ def general() = {
   heapSort(billion)
 }
 
-def mergeSort(A: Array[Int]): List[Int] = {
-
+def mergeSort(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def merge(A: Array[Int]): List[Int] = {
-
+def merge(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def quickSort(A: Array[Int]): List[Int] = {
-
+def quickSort(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def partition(A: Array[Int]): List[Int] = {
-
+def partition(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def radixSort(A: Array[Int]): List[Int] = {
-
+def radixSort(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def countingSort(A: Array[Int]): List[Int] = {
-
+def countingSort(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def heapSort(A: Array[Int]): List[Int] = {
-
+def heapSort(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
 
-def maxHeapify(A: Array[Int]): List[Int] = {
-
+def maxHeapify(A: Array[Int]): Array[Int] = {
+  Array(1, 2, 3, 4, 5)
 }
