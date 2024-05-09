@@ -15,8 +15,8 @@ val hundredMillion = new Array[Int](100000000)
 def general(): Unit = {
   testMerge()
 //  testQuick()
-//  testRadix()
-//  testHeap()
+  testRadix()
+  testHeap()
 }
 
 def testMerge(): Unit = {
@@ -207,7 +207,7 @@ def mergeSort(A: Array[Int]): Array[Int] = {
 
 def mergeSortPar(A: Array[Int]): Array[Int] = {
   val quarter = math.ceil(A.length / 4.0).toInt
-  val threshold = 50000
+  val threshold = 10000
 
   val first: Future[Array[Int]] = mergeSortParHelper(A.slice(0, quarter), threshold)
   val second: Future[Array[Int]] = mergeSortParHelper(A.slice(quarter, 2 * quarter), threshold)
@@ -226,7 +226,13 @@ def mergeSortPar(A: Array[Int]): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val first2 = merge2Arrays(firstSorted, secondSorted)
+  val first2: Future[Array[Int]] = merge2ArraysFuture(firstSorted, secondSorted)
+
+  val first2Sorted = Await.ready(first2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
 
   val thirdSorted = Await.ready(third, 600.seconds).value match
     case None => Array(0)
@@ -240,8 +246,15 @@ def mergeSortPar(A: Array[Int]): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val second2 = merge2Arrays(thirdSorted, fourthSorted)
-  merge2Arrays(first2, second2)
+  val second2: Future[Array[Int]] = merge2ArraysFuture(thirdSorted, fourthSorted)
+
+  val second2Sorted = Await.ready(second2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  merge2Arrays(first2Sorted, second2Sorted)
 }
 
 def mergeSortParHelper(A: Array[Int], threshold: Int): Future[Array[Int]] = {
@@ -351,7 +364,13 @@ def countingSortPar(A: Array[Int], exp: Int): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val first2 = merge2Arrays(firstSorted, secondSorted)
+  val first2: Future[Array[Int]] = merge2ArraysFuture(firstSorted, secondSorted)
+
+  val first2Sorted = Await.ready(first2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
 
   val thirdSorted = Await.ready(third, 600.seconds).value match
     case None => Array(0)
@@ -365,8 +384,15 @@ def countingSortPar(A: Array[Int], exp: Int): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val second2 = merge2Arrays(thirdSorted, fourthSorted)
-  merge2Arrays(first2, second2)
+  val second2: Future[Array[Int]] = merge2ArraysFuture(thirdSorted, fourthSorted)
+
+  val second2Sorted = Await.ready(second2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  merge2Arrays(first2Sorted, second2Sorted)
 }
 
 def countingSortParHelper(A: Array[Int], exp: Int): Future[Array[Int]] = {
@@ -448,7 +474,13 @@ def heapSortPar(A: Array[Int]): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val first2 = merge2Arrays(firstSorted, secondSorted)
+  val first2: Future[Array[Int]] = merge2ArraysFuture(firstSorted, secondSorted)
+
+  val first2Sorted = Await.ready(first2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
 
   val thirdSorted = Await.ready(third, 600.seconds).value match
     case None => Array(0)
@@ -462,8 +494,15 @@ def heapSortPar(A: Array[Int]): Array[Int] = {
       case Failure(exception) => throw exception
       case Success(value) => value
 
-  val second2 = merge2Arrays(thirdSorted, fourthSorted)
-  merge2Arrays(first2, second2)
+  val second2: Future[Array[Int]] = merge2ArraysFuture(thirdSorted, fourthSorted)
+
+  val second2Sorted = Await.ready(second2, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  merge2Arrays(first2Sorted, second2Sorted)
 }
 
 def heapSortParHelper(A: Array[Int]): Future[Array[Int]] = {
@@ -520,6 +559,38 @@ def merge2Arrays(arr1: Array[Int], arr2: Array[Int]): Array[Int] = {
   }
 
   merged
+}
+
+def merge2ArraysFuture(arr1: Array[Int], arr2: Array[Int]): Future[Array[Int]] = {
+  var j = 0
+  var k = 0
+  var i = 0
+  val merged = new Array[Int](arr1.length + arr2.length)
+
+  while (j < arr1.length && k < arr2.length) {
+    if (arr1(j) < arr2(k)) {
+      merged(i) = arr1(j)
+      j += 1
+    } else {
+      merged(i) = arr2(k)
+      k += 1
+    }
+    i += 1
+  }
+
+  while (j < arr1.length) {
+    merged(i) = arr1(j)
+    j += 1
+    i += 1
+  }
+
+  while (k < arr2.length) {
+    merged(i) = arr2(k)
+    k += 1
+    i += 1
+  }
+
+  Future(merged)
 }
 
 def isInAscendingOrder(A: Array[Int]): Boolean = {
