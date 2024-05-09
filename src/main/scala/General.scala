@@ -13,49 +13,57 @@ val hundredMillion = new Array[Int](100000000)
 
 @main
 def general(): Unit = {
-//  testMerge()
+  testMerge()
 //  testQuick()
-  testRadix()
-  testHeap()
+//  testRadix()
+//  testHeap()
 }
 
 def testMerge(): Unit = {
   println("---MERGE SORT TESTING---")
   println("Sequential:")
 
-  print(mergeSort(scramble(forty).toList).mkString("Proof of Concept: (", ", ", ")") + "\n")
-  println(isInAscendingOrder(forty))
+  val fortyMerge: Array[Int] = mergeSort(scramble(forty))
+  print(mergeSort(scramble(forty)).mkString("Proof of Concept: (", ", ", ")") + "\n")
+  println(isInAscendingOrder(fortyMerge))
 
-  val (timeMergeSort1000, _) = timeIt(mergeSort(scramble(thousand).toList))
+  val thousandMerge: Array[Int] = mergeSort(scramble(thousand))
+  val (timeMergeSort1000, _) = timeIt(mergeSort(scramble(thousand)))
   println(s"Merge Sort (1000 elements): ${timeMergeSort1000} ms")
-  println(isInAscendingOrder(thousand))
+  println(isInAscendingOrder(thousandMerge))
 
-  //  val (timeMergeSort1000000, _) = timeIt(mergeSort(scramble(million).toList))
-  //  println(s"Merge Sort (1000000 elements): ${timeMergeSort1000000} ms")
-//  println(isInAscendingOrder(million))
+  val millionMerge: Array[Int] = mergeSort(scramble(million))
+  val (timeMergeSort1000000, _) = timeIt(mergeSort(scramble(million)))
+  println(s"Merge Sort (1000000 elements): ${timeMergeSort1000000} ms")
+  println(isInAscendingOrder(millionMerge))
 
-  //  val (timeMergeSort100000000, _) = timeIt(mergeSort(scramble(hundredMillion).toList))
-  //  println  println(isInAscendingOrder(hundredMillion))(s"Merge Sort (100000000 elements): ${timeMergeSort100000000} ms")
-//  println(isInAscendingOrder(hundredMillion))
+  val hMillionMerge: Array[Int] = mergeSort(scramble(hundredMillion))
+  val (timeMergeSort100000000, _) = timeIt(mergeSort(scramble(hundredMillion)))
+  println(s"Merge Sort (100000000 elements): ${timeMergeSort100000000} ms")
+  println(isInAscendingOrder(hMillionMerge))
 
   println("Parallel:")
 
-  print(mergeSortPar(scramble(forty).toList).mkString("Proof of Concept: (", ", ", ")") + "\n")
-  println(isInAscendingOrder(forty))
+  val fortyMergePar: Array[Int] = mergeSortPar(scramble(forty))
+  print(mergeSortPar(scramble(forty)).mkString("Proof of Concept: (", ", ", ")") + "\n")
+  println(isInAscendingOrder(fortyMergePar))
 
-  val (timeMergeSortPar1000, _) = timeIt(mergeSortPar(scramble(thousand).toList))
+  val thousandMergePar: Array[Int] = mergeSortPar(scramble(thousand))
+  val (timeMergeSortPar1000, _) = timeIt(mergeSortPar(scramble(thousand)))
   println(s"Merge Sort (1000 elements): ${timeMergeSortPar1000} ms")
-  println(isInAscendingOrder(thousand))
+  println(isInAscendingOrder(thousandMergePar))
 
-  //  val (timeMergeSortPar1000000, _) = timeIt(mergeSortPar(scramble(million).toList))
-  //  println(s"Merge Sort (1000000 elements): ${timeMergeSortPar1000000} ms")
-//  println(isInAscendingOrder(million))
+  val millionMergePar: Array[Int] = mergeSortPar(scramble(million))
+  val (timeMergeSortPar1000000, _) = timeIt(mergeSortPar(scramble(million)))
+  println(s"Merge Sort (1000000 elements): ${timeMergeSortPar1000000} ms")
+  println(isInAscendingOrder(millionMergePar))
 
-  //  val (timeMergeSortPar100000000, _) = timeIt(mergeSortPar(scramble(hundredMillion).toList))
-  //  println(s"Merge Sort (100000000 elements): ${timeMergeSortPar100000000} ms")
-//  println(isInAscendingOrder(hundredMillion))
+  val hMillionMergePar: Array[Int] = mergeSortPar(scramble(hundredMillion))
+  val (timeMergeSortPar100000000, _) = timeIt(mergeSortPar(scramble(hundredMillion)))
+  println(s"Merge Sort (100000000 elements): ${timeMergeSortPar100000000} ms")
+  println(isInAscendingOrder(hMillionMergePar))
 
-  println("Ratio of sequential to parallel is " + timeMergeSort1000 / timeMergeSortPar1000 + " (greater than zero indicates parallelization improved the efficiency)")
+  println("Ratio of sequential to parallel is " + timeMergeSort100000000 / timeMergeSortPar100000000 + " (greater than zero indicates parallelization improved the efficiency)")
 }
 
 def testQuick(): Unit = {
@@ -189,30 +197,65 @@ def testHeap(): Unit = {
 
 /**----------------------------------------------------MERGE SORT-----------------------------------------------------*/
 
-def mergeSort(seq: List[Int]): List[Int] = seq match {
-  case Nil => Nil
-  case xs::Nil => List(xs)
-  case _ =>
-    val (left, right) = seq splitAt seq.length/2
-    merge(mergeSort(left), mergeSort(right))
+def mergeSort(A: Array[Int]): Array[Int] = {
+  if (A.length <= 1) A
+  else {
+    val (left, right) = A.splitAt(A.length / 2)
+    merge2Arrays(mergeSort(left), mergeSort(right))
+  }
 }
 
-@tailrec
-def merge(seq1: List[Int], seq2: List[Int], accumulator: List[Int] = List()):List[Int] = (seq1, seq2) match {
-  case (Nil, _) => accumulator ++ seq2
-  case (_, Nil) => accumulator ++ seq1
-  case (x::xs, y::ys) =>
-    if(x<y) merge(xs,seq2, accumulator :+ x)
-    else merge(seq1,ys, accumulator :+ y)
+def mergeSortPar(A: Array[Int]): Array[Int] = {
+  val quarter = math.ceil(A.length / 4.0).toInt
+  val threshold = 50000
+
+  val first: Future[Array[Int]] = mergeSortParHelper(A.slice(0, quarter), threshold)
+  val second: Future[Array[Int]] = mergeSortParHelper(A.slice(quarter, 2 * quarter), threshold)
+  val third: Future[Array[Int]] = mergeSortParHelper(A.slice(2 * quarter, 3 * quarter), threshold)
+  val fourth: Future[Array[Int]] = mergeSortParHelper(A.slice(3 * quarter, A.length), threshold)
+
+  val firstSorted = Await.ready(first, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  val secondSorted = Await.ready(second, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  val first2 = merge2Arrays(firstSorted, secondSorted)
+
+  val thirdSorted = Await.ready(third, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  val fourthSorted = Await.ready(fourth, 600.seconds).value match
+    case None => Array(0)
+    case Some(result) => result match
+      case Failure(exception) => throw exception
+      case Success(value) => value
+
+  val second2 = merge2Arrays(thirdSorted, fourthSorted)
+  merge2Arrays(first2, second2)
 }
 
-def mergeSortPar(seq: List[Int]): List[Int] = seq match {
-  //TODO: FINISH THIS
-  case Nil => Nil
-  case xs::Nil => List(xs)
-  case _ =>
-    val (left, right) = seq splitAt seq.length/2
-    merge(mergeSort(left), mergeSort(right))
+def mergeSortParHelper(A: Array[Int], threshold: Int): Future[Array[Int]] = {
+  if (A.length <= threshold) {
+    Future.successful(mergeSort(A))
+  } else {
+    val (left, right) = A.splitAt(A.length / 2)
+    val leftSorted = mergeSortParHelper(left, threshold)
+    val rightSorted = mergeSortParHelper(right, threshold)
+    for {
+      leftArr <- leftSorted
+      rightArr <- rightSorted
+    } yield merge2Arrays(leftArr, rightArr)
+  }
 }
 
 
