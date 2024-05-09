@@ -1,15 +1,26 @@
 import scala.annotation.tailrec
 import scala.util.Random
 import scala.collection.parallel.CollectionConverters.*
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration.*
+import scala.util.{Failure, Success, Using, Random}
+
+given ExecutionContext = ExecutionContext.global
+
+val twenty = new Array[Int](40)
+val thousand = new Array[Int](1000)
+val million = new Array[Int](1000000)
+val hundredMillion = new Array[Int](10000000)
 
 @main
-def general() = {
-  val twenty = new Array[Int](20)
-  val thousand = new Array[Int](1000)
-  val million = new Array[Int](1000000)
-  val hundredMillion = new Array[Int](100000000)
+def general(): Unit = {
+//  testMerge()
+//  testQuick()
+  testRadix()
+//  testHeap()
+}
 
-
+def testMerge(): Unit = {
   println("---MERGE SORT TESTING---")
   println("Sequential:")
 
@@ -18,11 +29,11 @@ def general() = {
   val (timeMergeSort1000, _) = timeIt(mergeSort(scramble(thousand).toList))
   println(s"Merge Sort (1000 elements): ${timeMergeSort1000} ms")
 
-  val (timeMergeSort1000000, _) = timeIt(mergeSort(scramble(million).toList))
-  println(s"Merge Sort (1000000 elements): ${timeMergeSort1000000} ms")
+  //  val (timeMergeSort1000000, _) = timeIt(mergeSort(scramble(million).toList))
+  //  println(s"Merge Sort (1000000 elements): ${timeMergeSort1000000} ms")
 
-//  val (timeMergeSort100000000, _) = timeIt(mergeSort(scramble(hundredMillion).toList))
-//  println(s"Merge Sort (100000000 elements): ${timeMergeSort100000000} ms")
+  //  val (timeMergeSort100000000, _) = timeIt(mergeSort(scramble(hundredMillion).toList))
+  //  println(s"Merge Sort (100000000 elements): ${timeMergeSort100000000} ms")
 
   println("Parallel:")
 
@@ -31,15 +42,16 @@ def general() = {
   val (timeMergeSortPar1000, _) = timeIt(mergeSortPar(scramble(thousand).toList))
   println(s"Merge Sort (1000 elements): ${timeMergeSortPar1000} ms")
 
-  val (timeMergeSortPar1000000, _) = timeIt(mergeSortPar(scramble(million).toList))
-  println(s"Merge Sort (1000000 elements): ${timeMergeSortPar1000000} ms")
+  //  val (timeMergeSortPar1000000, _) = timeIt(mergeSortPar(scramble(million).toList))
+  //  println(s"Merge Sort (1000000 elements): ${timeMergeSortPar1000000} ms")
 
-//  val (timeMergeSortPar100000000, _) = timeIt(mergeSortPar(scramble(hundredMillion).toList))
-//  println(s"Merge Sort (100000000 elements): ${timeMergeSortPar100000000} ms")
+  //  val (timeMergeSortPar100000000, _) = timeIt(mergeSortPar(scramble(hundredMillion).toList))
+  //  println(s"Merge Sort (100000000 elements): ${timeMergeSortPar100000000} ms")
 
-  println("Ratio of sequential to parallel is " + timeMergeSort1000000/timeMergeSortPar1000000 + " (greater than zero indicates parallelization improved the efficiency)")
+  println("Ratio of sequential to parallel is " + timeMergeSort1000 / timeMergeSortPar1000 + " (greater than zero indicates parallelization improved the efficiency)")
+}
 
-
+def testQuick(): Unit = {
   println("---QUICK SORT TESTING---")
   println("Sequential:")
 
@@ -68,8 +80,9 @@ def general() = {
   println(s"Quick Sort (100000000 elements): ${timeQuickSortPar100000000} ms")
 
   println("Ratio of sequential to parallel is " + timeQuickSort100000000 / timeQuickSortPar100000000 + " (greater than zero indicates parallelization improved the efficiency)")
+}
 
-
+def testRadix(): Unit = {
   println("---RADIX SORT TESTING---")
   println("Sequential:")
 
@@ -94,12 +107,13 @@ def general() = {
   val (timeRadixSortPar1000000, _) = timeIt(radixSortPar(scramble(million)))
   println(s"Radix Sort (1000000 elements): ${timeRadixSortPar1000000} ms")
 
-  val (timeRadixSortPar100000000, _) = timeIt(radixSortPar(scramble(hundredMillion)))
-  println(s"Radix Sort (100000000 elements): ${timeRadixSortPar100000000} ms")
+    val (timeRadixSortPar100000000, _) = timeIt(radixSortPar(scramble(hundredMillion)))
+    println(s"Radix Sort (100000000 elements): ${timeRadixSortPar100000000} ms")
 
   println("Ratio of sequential to parallel is " + timeRadixSort100000000 / timeRadixSortPar100000000 + " (greater than zero indicates parallelization improved the efficiency)")
+}
 
-
+def testHeap(): Unit = {
   println("---HEAP SORT TESTING---")
   println("Sequential:")
 
@@ -129,7 +143,6 @@ def general() = {
 
   println("Ratio of sequential to parallel is " + timeHeapSort100000000 / timeHeapSortPar100000000 + " (greater than zero indicates parallelization improved the efficiency)")
 }
-
 
 /**----------------------------------------------------MERGE SORT-----------------------------------------------------*/
 
@@ -236,43 +249,26 @@ def radixSortPar(A: Array[Int]): Array[Int] = {
 def countingSortPar(A: Array[Int], exp: Int): Array[Int] = {
   //TODO: FINISH THIS
 
-  //  val max: Int = A.max
-//  val C = Array.fill(max + 1)(0)
-//  val B = Array.fill(A.length)(0)
-//
-//  A.par.foreach(num => {
-//    synchronized {
-//      C((num / exp) % 10) += 1
-//    }
-//  })
-//
-//  for (i <- 1 until C.length) {C(i) += C(i - 1)}
-//
-//  A.indices.reverse.foreach { i =>
-//      B(C((A(i) / exp) % 10) - 1) = A(i)
-//      C((A(i) / exp) % 10) -= 1
-//  }
-//
-//  B
   val max: Int = A.max
-  val C = A.par.aggregate(Array.fill(max + 1)(0))(
-    (localC, num) => {
-      val index = (num / exp) % 10
-      localC.updated(index, localC(index) + 1)
-    },
-    (c1, c2) => c1.zip(c2).map { case (a, b) => a + b }
-  )
+  val C = Array.fill(max + 1)(0)
+  val B = Array.fill(A.length)(0)
 
-  val scan = C.scanLeft(0)(_ + _).tail
+  A.par.foreach(num => {
+    synchronized {
+      C((num / exp) % 10) += 1
+    }
+  })
 
-  val B = A.par.map { num =>
-    val index = (num / exp) % 10
-    val position = scan(index)
-    scan(index) += 1
-    (position, num)
-  }.toArray
+//  for (num <- A) {C((num / exp) % 10) += 1}
 
-  B.sortBy(_._1).map(_._2)
+  for (i <- 1 until C.length) {C(i) += C(i - 1)}
+
+  A.indices.reverse.foreach { i =>
+      B(C((A(i) / exp) % 10) - 1) = A(i)
+      C((A(i) / exp) % 10) -= 1
+  }
+
+  B
 }
 
 
@@ -318,16 +314,50 @@ def swap(A: Array[Int], i: Int, j: Int): Unit = {
 }
 
 def heapSortPar(A: Array[Int]): Array[Int] = {
-  //TODO: FINISH THIS
+    val quarter = math.ceil(A.length/4.0).toInt
 
+    val first: Future[Array[Int]] = heapSortParHelper(A.slice(0, quarter))
+    val second: Future[Array[Int]] = heapSortParHelper(A.slice(quarter, 2*quarter))
+    val third: Future[Array[Int]] = heapSortParHelper(A.slice(2*quarter, 3*quarter))
+    val fourth: Future[Array[Int]] = heapSortParHelper(A.slice(3*quarter, A.length))
+
+    val firstSorted = Await.ready(first, 100.seconds).value match
+      case None => Array(0)
+      case Some(result) => result match
+        case Failure(exception) => throw exception
+        case Success(value) => value
+
+    val secondSorted = Await.ready(second, 100.seconds).value match
+      case None => Array(0)
+      case Some(result) => result match
+        case Failure(exception) => throw exception
+        case Success(value) => value
+
+    val thirdSorted = Await.ready(third, 100.seconds).value match
+      case None => Array(0)
+      case Some(result) => result match
+        case Failure(exception) => throw exception
+        case Success(value) => value
+
+    val fourthSorted = Await.ready(fourth, 100.seconds).value match
+      case None => Array(0)
+      case Some(result) => result match
+        case Failure(exception) => throw exception
+        case Success(value) => value
+
+  val first2 = merge2Arrays(firstSorted, secondSorted)
+  val second2 = merge2Arrays(thirdSorted, fourthSorted)
+  merge2Arrays(first2, second2)
+}
+
+def heapSortParHelper(A: Array[Int]): Future[Array[Int]] = {
   val size = A.length
   buildMaxHeapPar(A, size - 1)
-  (size - 1 to 1 by -1).par.foreach { i =>
-//  for i <- size -1 to 1 by -1 yield {
+  for (i <- size - 1 to 1 by -1) {
     swap(A, 0, i)
-    maxHeapify(A, 0, i-1)
+    maxHeapify(A, 0, i - 1)
   }
-  A
+  Future(A)
 }
 
 def buildMaxHeapPar(A: Array[Int], size: Int): Unit = {
@@ -342,6 +372,38 @@ def scramble(A: Array[Int]): Array[Int] = {
 
   for (i <- A.indices) yield A(i) = rand.nextInt(1000)
   A
+}
+
+def merge2Arrays(arr1: Array[Int], arr2: Array[Int]): Array[Int] = {
+  var j = 0
+  var k = 0
+  var i = 0
+  val merged = new Array[Int](arr1.length + arr2.length)
+
+  while (j < arr1.length && k < arr2.length) {
+    if (arr1(j) < arr2(k)) {
+      merged(i) = arr1(j)
+      j += 1
+    } else {
+      merged(i) = arr2(k)
+      k += 1
+    }
+    i += 1
+  }
+
+  while (j < arr1.length) {
+    merged(i) = arr1(j)
+    j += 1
+    i += 1
+  }
+
+  while (k < arr2.length) {
+    merged(i) = arr2(k)
+    k += 1
+    i += 1
+  }
+
+  merged
 }
 
 def timeIt[A](f: => A): (Double, A) = {
